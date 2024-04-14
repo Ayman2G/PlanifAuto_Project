@@ -1,4 +1,4 @@
-🤖 Automatic Planning Project (PO)
+# Automatic Planning Project (PO)
 
 Automated planning, also known as AI planning or automated plan generation, is a subfield of artificial intelligence that focuses on developing algorithms and techniques for generating plans or sequences of actions to achieve specific goals or objectives. The goal of automated planning is to build systems that can reason about complex tasks, generate plans to achieve them, and execute those plans in a real-world environment.
 
@@ -10,9 +10,11 @@ We defined several heuristic functions that can be used interchangeably as input
 
 🏁 Getting started
 
-Create a Python environment and activate it. After that, you need to use the following command to install all the required packages and dependencies:
-
+Activate dependencies :
+```
 pip install -r requirements.txt
+```
+
+Then, run the ```main.py``` file with the arguments of your choice.
 
 
-Then, run the main.py file with the arguments of your choice.
