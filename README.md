@@ -3,7 +3,7 @@
 ## Description
 
 This project aims at solving a pddl problem. For this purpose, we implemented a method that uses both A* and the heuristic of FastForward. This is part of the automated planning course of CentraleSupélec.
-
+On a choisi comme problème à résoudre : Taquin
 ## Team Members
 
 - Ayman Moumen
