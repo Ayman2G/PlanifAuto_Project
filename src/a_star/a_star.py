@@ -50,7 +50,7 @@ class AStar:
         try :
             res = gp.compute_heuristic()
         except :
-            print("echec")
+            print("No more actions in this path")
             res=0
         return res
 
