@@ -1,33 +1,38 @@
-from time import time
+import time
 
-from parser_files.pddlparser import PDDLParser
-from a_star_algorithm import AStar
-
-
-###########################################################
-DOMAIN = 'pddl_files/dinner/dinner.pddl'
-PROBLEM = 'pddl_files/dinner/pb1.pddl'
-#DOMAIN = 'pddl_files/Nonogram/domain.pddl'
-#PROBLEM = 'pddl_files/Nonogram/Problem1_2x2_conf1.pddl'
-HEURISTIC_NAME = "null_heuristic"
-# Different heuristics : "landmarks heuristic" "null_heuristic", "fast_forward","sum_of_subgoals", "hamming_distance", "max_proposition", "monotone"
-###########################################################
-
-parser = PDDLParser()
-domain = parser.parse(DOMAIN)
-problem = parser.parse(PROBLEM)
-
-a_star = AStar(domain=domain, problem=problem)
-
-start = time()
-# A* algorithm
-plan = a_star.a_star_algorithm(heuristic_name=HEURISTIC_NAME)
-end = time()
-total_time = round(end - start, 2)
-
-minutes = total_time // 60
-seconds = total_time % 60
+from src.parser.pddlparser import PDDLParser
+from src.a_star.a_star import AStar, verify
+from src.graphplan.classes import GroundedActionNode
 
 
-print(f"\nComputed in {int(minutes)} min {round(seconds, 3)}s\n")
-print(f"Plan length: {len(plan)}\n")
+def main(domain_file: str, problem_file: str, with_back_cost: bool = True) -> None:
+    # Initialization
+    domain = PDDLParser.parse(domain_file)
+    problem = PDDLParser.parse(problem_file)
+
+    # Computation of the solution
+    t0 = time.time()
+    a = AStar(domain, problem, with_back_cost=with_back_cost)
+    path = a.solve()
+    delta_time = time.time() - t0
+
+    # Verification
+    assert verify(domain, problem, path)
+
+    # Print results
+    print("\n############   Results   ############")
+    print("Solution :")
+    for p in path:
+        print(p.sig)
+    print(f"Length of the solution: {len(path)}")
+    print(f"Computation time: {delta_time:.2f}s")
+
+
+if __name__ == "__main__":
+    ##############     Parameters can be changed here     ##############
+    domain_file = "data/groupe6/taquin_domain.pddl"
+    problem_file = "data/groupe6/taquin-size4x4-conf_9.pddl"
+    with_back_cost = True
+    ####################################################################
+
+    main(domain_file, problem_file, with_back_cost=with_back_cost)

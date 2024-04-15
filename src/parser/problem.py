@@ -1,10 +1,10 @@
-'''
+"""
 Classes and functions for creating a problem object
-'''
+"""
 
 from itertools import product
 
-from parser_files import domain
+import src.parser.domain as domain
 
 ###############################################################################
 # PROBLEM CLASS
@@ -12,16 +12,15 @@ from parser_files import domain
 
 
 class Problem(object):
-
     def __init__(self, problem=None, domain=None, init=None, goal=()):
-        '''
+        """
         Represents a PDDL Problem Specification
         @problem : a string specifying the problem name
         @domain : a string specifying the domain name
         @objects : dictionary of object tuples keyed by type
         @init : a State object as the initial state
         @goal : tuple of goal state predicates
-        '''
+        """
         self.problem = problem
         self.domain = domain
         self.initial_state = init
@@ -35,15 +34,14 @@ class Problem(object):
         if goals == None:
             goals = self.goals
 
-        problem_str = '@ Problem: {0}\n'.format(self.problem)
-        problem_str += '>> domain: {0}\n'.format(self.domain)
+        problem_str = "@ Problem: {0}\n".format(self.problem)
+        problem_str += ">> domain: {0}\n".format(self.domain)
         if len(self.initial_state.objects) > 0:
-            problem_str += '>> objects: {}\n'.format(
-                self.initial_state.objects)
-        problem_str += '>> init:\n   {0}\n'.format(
-            '\n   '.join(map(str, state.predicates)))
-        problem_str += '>> goal:\n   {0}\n'.format(
-            '\n   '.join(map(str, goals)))
+            problem_str += ">> objects: {}\n".format(self.initial_state.objects)
+        problem_str += ">> init:\n   {0}\n".format(
+            "\n   ".join(map(str, state.predicates))
+        )
+        problem_str += ">> goal:\n   {0}\n".format("\n   ".join(map(str, goals)))
         return problem_str
 
 
@@ -56,17 +54,18 @@ class State(object):
     objects = {}
 
     def __init__(self, predicates):
-        '''Represents a state'''
+        """Represents a state"""
         self.predicates = frozenset(predicates)
 
     def is_true(self, pos_predicates, neg_predicates=()):
-        return (all(p in self.predicates for p in pos_predicates) and
-                all(p not in self.predicates for p in neg_predicates))
+        return all(p in self.predicates for p in pos_predicates) and all(
+            p not in self.predicates for p in neg_predicates
+        )
 
     def apply(self, action):
-        '''
+        """
         Apply a deterministic action to this state to produce a new state.
-        '''
+        """
         new_preds = set(self.predicates)
         new_preds -= set(action.effects.del_effects)
         new_preds |= set(action.effects.add_effects)
@@ -91,27 +90,29 @@ class State(object):
             # (forall (var_lst) (when (cnd) (effects)))
             elif len(effect) == 5:
                 # first ground var_list in the state
-                (var_lst, pos_cnd_lst, neg_cnd_lst,
-                 pos_eff_lst, neg_eff_lst) = effect
+                (var_lst, pos_cnd_lst, neg_cnd_lst, pos_eff_lst, neg_eff_lst) = effect
                 (types, arg_names) = zip(*var_lst)
                 param_lists = [self.objects[t] for t in types]
                 for params in product(*param_lists):
                     ground = domain._grounder(arg_names, params)
-                    if self.is_true([ground(eff) for eff in pos_cnd_lst], [ground(eff) for eff in neg_cnd_lst]):
+                    if self.is_true(
+                        [ground(eff) for eff in pos_cnd_lst],
+                        [ground(eff) for eff in neg_cnd_lst],
+                    ):
                         new_preds -= set([ground(eff) for eff in neg_eff_lst])
                         new_preds |= set([ground(eff) for eff in pos_eff_lst])
 
         return State(new_preds)
 
     def apply_nd(self, action):
-        '''
+        """
         Apply a non-deterministic action to this state to produce a new state.
-        '''
+        """
         # a list of states after the action application
         states = []
 
         def application(predicates, effects):
-            '''apply @effects in @predicates'''
+            """apply @effects in @predicates"""
             new_preds = set(predicates)
             new_preds -= set(effects.del_effects)
             new_preds |= set(effects.add_effects)
@@ -136,17 +137,23 @@ class State(object):
                 # (forall (var_lst) (when (cnd) (effects)))
                 elif len(effect) == 5:
                     # first ground var_list in the state
-                    (var_lst, pos_cnd_lst, neg_cnd_lst,
-                     pos_eff_lst, neg_eff_lst) = effect
+                    (
+                        var_lst,
+                        pos_cnd_lst,
+                        neg_cnd_lst,
+                        pos_eff_lst,
+                        neg_eff_lst,
+                    ) = effect
                     (types, arg_names) = zip(*var_lst)
                     param_lists = [self.objects[t] for t in types]
                     for params in product(*param_lists):
                         ground = domain._grounder(arg_names, params)
-                        if self.is_true([ground(eff) for eff in pos_cnd_lst], [ground(eff) for eff in neg_cnd_lst]):
-                            new_preds -= set([ground(eff)
-                                             for eff in neg_eff_lst])
-                            new_preds |= set([ground(eff)
-                                             for eff in pos_eff_lst])
+                        if self.is_true(
+                            [ground(eff) for eff in pos_cnd_lst],
+                            [ground(eff) for eff in neg_cnd_lst],
+                        ):
+                            new_preds -= set([ground(eff) for eff in neg_eff_lst])
+                            new_preds |= set([ground(eff) for eff in pos_eff_lst])
             return new_preds
 
         # deterministic effects
@@ -161,14 +168,14 @@ class State(object):
                     prob_effects_lst.append(prob_effects)
                 else:
                     prob_effects_lst.append(
-                        prob_effects+tuple([(0, domain.GroundedEffect())]))
+                        prob_effects + tuple([(0, domain.GroundedEffect())])
+                    )
 
             for prob_effects in list(product(*prob_effects_lst)):
                 if prob_effects:
                     predicates = set(states[0].predicates)
                     for prob_effect in prob_effects:
-                        predicates.update(application(
-                            predicates, prob_effect[1]))
+                        predicates.update(application(predicates, prob_effect[1]))
                     states.append(State(predicates | states[0].predicates))
 
         # non-deterministic effects
@@ -180,14 +187,14 @@ class State(object):
                     oneof_effects_lst.append(oneof_effects)
                 else:
                     oneof_effects_lst.append(
-                        oneof_effects+tuple([domain.GroundedEffect()]))
+                        oneof_effects + tuple([domain.GroundedEffect()])
+                    )
 
             for oneof_effects in list(product(*oneof_effects_lst)):
                 if oneof_effects:
                     predicates = set(states[0].predicates)
                     for oneof_effect in oneof_effects:
-                        predicates.update(application(
-                            predicates, oneof_effect))
+                        predicates.update(application(predicates, oneof_effect))
                     states.append(State(predicates | states[0].predicates))
 
         # non-deterministic action
@@ -198,12 +205,12 @@ class State(object):
         return states
 
     def constrain_state(self, ex_actions, map_actions={}, nd_actions={}):
-        '''
-        returns a new state copied from this state and adds 'disallowed' 
-        predicates from given @ex_actions into its predicates 
-        @ex_actions : a list of grounded action signatures that 
+        """
+        returns a new state copied from this state and adds 'disallowed'
+        predicates from given @ex_actions into its predicates
+        @ex_actions : a list of grounded action signatures that
         should become inapplicable in this state
-        '''
+        """
         if not ex_actions:
             return self
 
@@ -215,21 +222,30 @@ class State(object):
             # if ex_action is non-deterministic then add also for all other outcomes/names
             if ex_action[0] in nd_actions:
                 for i in range(nd_actions[ex_action[0]]):
-                    predicates.append((('disallowed_{}'.format('%s_%s' % (
-                        map_actions[ex_action[0]], i)),) + ex_action[1:6]))
+                    predicates.append(
+                        (
+                            (
+                                "disallowed_{}".format(
+                                    "%s_%s" % (map_actions[ex_action[0]], i)
+                                ),
+                            )
+                            + ex_action[1:6]
+                        )
+                    )
             else:
                 predicates.append(
-                    (('disallowed_{}'.format(ex_action[0]),) + ex_action[1:6]))
+                    (("disallowed_{}".format(ex_action[0]),) + ex_action[1:6])
+                )
 
         # return a new state
         return State(predicates=frozenset(predicates))
 
     def __bool__(self):
-        '''Return false if state is empty, otherwise true'''
+        """Return false if state is empty, otherwise true"""
         return not (not self.predicates)
 
     def __len__(self):
-        '''Return length of the state (length of predicates)'''
+        """Return length of the state (length of predicates)"""
         return len(self.predicates)
 
     # Implement __hash__ and __eq__ so we can easily
@@ -239,11 +255,10 @@ class State(object):
         return hash((self.predicates))
 
     def __eq__(self, other):
-        return (False if other == None else
-                (self.predicates == other.predicates))
+        return False if other == None else (self.predicates == other.predicates)
 
     def __str__(self):
-        return ('%s' % '\n'.join(map(str, self.predicates)))
+        return "%s" % "\n".join(map(str, self.predicates))
 
     def __lt__(self, other):
         return hash(self) < hash(other)
