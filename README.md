@@ -1,4 +1,4 @@
-# PlanAuto
+# Planification Automatique
 
 ## Description
 
