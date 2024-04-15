@@ -31,7 +31,7 @@ def main(domain_file: str, problem_file: str, with_back_cost: bool = True) -> No
 if __name__ == "__main__":
     ##############     Parameters can be changed here     ##############
     domain_file = "data/groupe6/taquin_domain.pddl"
-    problem_file = "data/groupe6/taquin-size4x4-conf_9.pddl"
+    problem_file = "data/groupe6/taquin-size3x3-conf_9.pddl"
     with_back_cost = True
     ####################################################################
 
