@@ -47,7 +47,11 @@ class AStar:
     def compute_heuristic(self) -> int:
         gp = GraphPlan(self.domain, self.problem, self.current_state)
         gp.build()
-        res = gp.compute_heuristic()
+        try :
+            res = gp.compute_heuristic()
+        except :
+            print("echec")
+            res=0
         return res
 
     def update_priority(self, current_path: Path) -> None:
