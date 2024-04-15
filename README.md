@@ -16,6 +16,12 @@ On a choisi comme problème à résoudre : Taquin
 The repository is composed of a `main.py` to run the project, a folder `data` to store the problems and domains pddl files, a `src` folder with the parser, the graphplan part to compute the heuristic and the a_star part to run A*.
 
 
+## Installation 
+
+```
+pip install -r requirements.txt
+```
+
 ## Usage
 
 To compute a solution of a planification problem, run the main.py file :
